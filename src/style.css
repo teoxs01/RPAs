@@ -1,0 +1,104 @@
+:root {
+  --primary-color: #0078d4;
+  --primary-color-hover: #005a9e;
+  --header-bg: #0b0b0c;
+  --header-accent: #00a2ff;
+  --surface-color: #f2f2f2;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --border-color: #d9d9d9;
+  --card-bg: #ffffff;
+  --input-bg: #eaf3ff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial,
+    sans-serif;
+  color: var(--text-primary);
+  background: var(--surface-color);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.v-application {
+  background: var(--surface-color) !important;
+}
+
+.v-card {
+  border-radius: 8px !important;
+  border: 1px solid var(--border-color) !important;
+  background: var(--card-bg) !important;
+}
+
+.v-btn {
+  border-radius: 6px !important;
+}
+
+.v-btn--variant-elevated {
+  box-shadow: 0 2px 8px rgba(16, 24, 40, 0.12) !important;
+}
+
+.v-btn--variant-elevated.v-btn--color-primary {
+  background: var(--primary-color) !important;
+}
+
+.v-btn--variant-elevated.v-btn--color-primary:hover {
+  background: var(--primary-color-hover) !important;
+}
+
+.v-field--variant-outlined .v-field__outline__start,
+.v-field--variant-outlined .v-field__outline__end,
+.v-field--variant-outlined .v-field__outline__notch {
+  border-color: var(--border-color) !important;
+}
+
+.v-field--variant-outlined .v-field__field {
+  background: var(--input-bg);
+}
+
+.v-field--focused.v-field--variant-outlined .v-field__outline__start,
+.v-field--focused.v-field--variant-outlined .v-field__outline__end,
+.v-field--focused.v-field--variant-outlined .v-field__outline__notch {
+  border-color: var(--primary-color) !important;
+}
+
+.v-table,
+.v-data-table {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.v-data-table thead th {
+  background: #f7f7f7 !important;
+  color: #111827 !important;
+  font-weight: 800 !important;
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+
+.page-subtitle {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
