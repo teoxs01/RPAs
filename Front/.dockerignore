@@ -2,6 +2,8 @@ node_modules
 dist
 .git
 .vscode
+.gitignore
+README.md
 .idea
 .env
 .env.*

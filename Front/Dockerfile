@@ -6,7 +6,12 @@ RUN npm ci
 
 COPY . .
 
+# Argumentos para la build de Vite
+ARG VITE_API_BASE_URL
 ARG VITE_GRAFANA_EMBED_URL
+
+# Exponer variables de entorno para la build
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 ENV VITE_GRAFANA_EMBED_URL=$VITE_GRAFANA_EMBED_URL
 
 RUN npm run build

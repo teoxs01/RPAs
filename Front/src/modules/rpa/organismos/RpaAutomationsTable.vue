@@ -158,10 +158,10 @@ defineProps<{
   totalItems: number;
   headers: any[];
   loading: boolean;
-  rowBusy: Set<string | number>;
+  rowBusy: Set<number>;
   activeFiltersCount: number;
   estadoColor: (estado: string) => string;
-  formatDateTime: (date: string) => string;
+  formatDateTime: (date: string | null) => string;
   isAllDays: (days: string[]) => boolean;
 }>();
 

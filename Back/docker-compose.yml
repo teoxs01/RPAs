@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+
+  rpa-api:
+    build:
+      context: ./aguasdem-ms-plataforma-rpa
+      dockerfile: Dockerfile
+    container_name: rpa-api
+    ports:
+      - "5080:8080"
+    environment:
+      - ConnectionStrings__PostgresConnection=Host=192.168.24.13;Port=5432;Database=postgres;Username=postgres;Password=B3Y8fqK1c9Wd;SearchPath=rpa,public
+    networks:
+      - rpa-network
+
+  rpa-front:
+    build:
+      context: ../Front
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=http://localhost:5080
+    container_name: rpa-front
+    ports:
+      - "80:80"
+    depends_on:
+      - rpa-api
+    networks:
+      - rpa-network
+
+  postgres-rpa:
+    image: postgres:15
+    container_name: postgres-rpa
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - rpa-network
+
+networks:
+  rpa-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

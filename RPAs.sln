@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.002.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Back", "Back", "{20D3C419-BD96-440F-BC02-8A0F1F00BEBD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "aguasdem-ms-plataforma-rpa", "Back\aguasdem-ms-plataforma-rpa\aguasdem-ms-plataforma-rpa.csproj", "{86ADB3E4-9BA8-479D-9D76-8916F1C725B2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{86ADB3E4-9BA8-479D-9D76-8916F1C725B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86ADB3E4-9BA8-479D-9D76-8916F1C725B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86ADB3E4-9BA8-479D-9D76-8916F1C725B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86ADB3E4-9BA8-479D-9D76-8916F1C725B2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{86ADB3E4-9BA8-479D-9D76-8916F1C725B2} = {20D3C419-BD96-440F-BC02-8A0F1F00BEBD}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BBBB45F0-3893-4B73-89D8-1D35661F745B}
+	EndGlobalSection
+EndGlobal

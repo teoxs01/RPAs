@@ -1,4 +1,4 @@
-import { onMounted, reactive, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
 import type { Automation, AutomationUpsertInput } from '@/modules/rpa/types';
 import type { ToastColor } from '@/modules/rpa/composables/useRpaToast';
@@ -15,7 +15,7 @@ import {
 export function useRpaAutomations(showToast: (message: string, color: ToastColor) => void) {
   const items = ref<Automation[]>([]);
   const tableLoading = ref(false);
-  const rowBusy = reactive(new Set<number>());
+  const rowBusy = ref(new Set<number>());
 
   async function load() {
     tableLoading.value = true;
@@ -61,8 +61,8 @@ export function useRpaAutomations(showToast: (message: string, color: ToastColor
   }
 
   async function toggleActive(item: Automation) {
-    if (rowBusy.has(item.id)) return;
-    rowBusy.add(item.id);
+    if (rowBusy.value.has(item.id)) return;
+    rowBusy.value.add(item.id);
     try {
       await setAutomationActive(item.id, !item.activo);
       showToast(!item.activo ? 'Automatización activada' : 'Automatización desactivada', 'info');
@@ -71,13 +71,13 @@ export function useRpaAutomations(showToast: (message: string, color: ToastColor
       const message = e instanceof Error ? e.message : 'No fue posible actualizar el estado';
       showToast(message, 'error');
     } finally {
-      rowBusy.delete(item.id);
+      rowBusy.value.delete(item.id);
     }
   }
 
   async function execute(item: Automation) {
-    if (rowBusy.has(item.id)) return;
-    rowBusy.add(item.id);
+    if (rowBusy.value.has(item.id)) return;
+    rowBusy.value.add(item.id);
     try {
       await executeAutomation(item.id);
       showToast('Ejecución enviada', 'success');
@@ -86,13 +86,13 @@ export function useRpaAutomations(showToast: (message: string, color: ToastColor
       const message = e instanceof Error ? e.message : 'No fue posible ejecutar';
       showToast(message, 'error');
     } finally {
-      rowBusy.delete(item.id);
+      rowBusy.value.delete(item.id);
     }
   }
 
   async function remove(id: number) {
-    if (rowBusy.has(id)) return;
-    rowBusy.add(id);
+    if (rowBusy.value.has(id)) return;
+    rowBusy.value.add(id);
     try {
       await deleteAutomation(id);
       showToast('Automatización eliminada', 'success');
@@ -102,7 +102,7 @@ export function useRpaAutomations(showToast: (message: string, color: ToastColor
       showToast(message, 'error');
       throw e;
     } finally {
-      rowBusy.delete(id);
+      rowBusy.value.delete(id);
     }
   }
 

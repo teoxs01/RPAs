@@ -93,7 +93,7 @@
 
 <script setup lang="ts">
 import RpaScriptPathField from '@/modules/rpa/moleculas/RpaScriptPathField.vue';
-import type { Automation, AutomationUpsertInput } from '@/modules/rpa/types';
+import type { AutomationUpsertInput } from '@/modules/rpa/types';
 
 defineProps<{
   open: boolean;

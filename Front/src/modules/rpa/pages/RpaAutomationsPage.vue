@@ -50,7 +50,7 @@
     :script-path-error="scriptPathError"
     :dias-semana="diasSemana"
     :is-all-days="isAllDays"
-    @update:field="({ field, value }: { field: string; value: any }) => {
+    @update:field="({ field, value }: { field: keyof AutomationUpsertInput; value: any }) => {
       (editor.form as any)[field] = value;
     }"
     @close="closeEditor"
@@ -65,7 +65,7 @@
     :draft="filtersDraft"
     :activo-options="activoOptions"
     :estado-options="estadoOptions"
-    @update:field="({ field, value }) => (filtersDraft[field as keyof typeof filtersDraft] = value)"
+    @update:field="({ field, value }: { field: 'search' | 'activo' | 'ultimoEstado'; value: any }) => (filtersDraft[field] = value)"
     @clear="clearFilters"
     @close="closeFilters"
     @apply="applyFilters"
@@ -102,6 +102,7 @@ import RpaAutomationEditor from '@/modules/rpa/organismos/RpaAutomationEditor.vu
 import RpaAutomationsFilters from '@/modules/rpa/organismos/RpaAutomationsFilters.vue';
 
 import { useRpaAutomationsPage } from '@/modules/rpa/composables/useRpaAutomationsPage';
+import type { AutomationUpsertInput } from '@/modules/rpa/types';
 
 const {
   headers,
