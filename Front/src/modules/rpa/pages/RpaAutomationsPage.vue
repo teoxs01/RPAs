@@ -78,7 +78,7 @@
     confirm-color="error"
     icon="mdi-alert-circle-outline"
     icon-color="error"
-    :loading="!!deleter.target && rowBusy.has(deleter.target.id)"
+    :loading="!!deleter.target && rowBusy.has(deleter.target.autoId)"
     @cancel="closeDelete"
     @confirm="confirmDelete"
   >

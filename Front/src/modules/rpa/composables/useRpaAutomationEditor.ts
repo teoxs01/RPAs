@@ -16,7 +16,11 @@ export function useRpaAutomationEditor(showToast: (message: string, color: Toast
     mode: 'create' as 'create' | 'edit',
     editingId: null as number | null,
     form: {
+      codigo: '',
       nombre: '',
+      descripcion: null as string | null,
+      tipo: 'RPA',
+      entorno: 'PROD',
       scriptPath: '',
       horaEjecucion: '08:00',
       diasEjecucion: [] as string[],
@@ -87,6 +91,7 @@ export function useRpaAutomationEditor(showToast: (message: string, color: Toast
 
   const canSave = computed(() => {
     return (
+      editor.form.codigo.trim().length > 0 &&
       editor.form.nombre.trim().length > 0 &&
       !scriptPathError.value &&
       editor.form.horaEjecucion.trim().length > 0 &&
@@ -98,7 +103,11 @@ export function useRpaAutomationEditor(showToast: (message: string, color: Toast
     editor.mode = 'create';
     editor.editingId = null;
     editor.form = {
+      codigo: '',
       nombre: '',
+      descripcion: null,
+      tipo: 'RPA',
+      entorno: 'PROD',
       scriptPath: '',
       horaEjecucion: '08:00',
       diasEjecucion: [],
@@ -109,14 +118,19 @@ export function useRpaAutomationEditor(showToast: (message: string, color: Toast
 
   function openEdit(item: Automation) {
     editor.mode = 'edit';
-    editor.editingId = item.id;
+    editor.editingId = item.autoId;
     editor.form = {
+      autoId: item.autoId, // Añadimos el ID para que el editor sepa qué está editando
+      codigo: item.codigo ?? '',
       nombre: item.nombre,
-      scriptPath: item.scriptPath,
-      horaEjecucion: item.horaEjecucion,
-      diasEjecucion: [...item.diasEjecucion],
-      activo: item.activo,
-    };
+      descripcion: item.descripcion ?? null,
+      tipo: item.tipo ?? 'RPA',
+      entorno: item.entorno ?? 'PROD',
+      scriptPath: item.scriptPath ?? '',
+      horaEjecucion: item.horaEjecucion ?? '08:00',
+      diasEjecucion: item.diasEjecucion ? [...item.diasEjecucion] : [],
+      activo: item.activo ?? true,
+    } as any;
     editor.open = true;
   }
 
@@ -126,7 +140,11 @@ export function useRpaAutomationEditor(showToast: (message: string, color: Toast
 
   function buildUpsertInput(): AutomationUpsertInput {
     return {
+      codigo: editor.form.codigo.trim(),
       nombre: editor.form.nombre.trim(),
+      descripcion: editor.form.descripcion,
+      tipo: editor.form.tipo,
+      entorno: editor.form.entorno,
       scriptPath: normalizeServerPath(editor.form.scriptPath),
       horaEjecucion: editor.form.horaEjecucion,
       diasEjecucion: [...editor.form.diasEjecucion],
@@ -137,12 +155,14 @@ export function useRpaAutomationEditor(showToast: (message: string, color: Toast
   function validateBeforeSave() {
     if (canSave.value) return true;
 
+    const codigo = editor.form.codigo.trim();
     const nombre = editor.form.nombre.trim();
     const hora = editor.form.horaEjecucion.trim();
     const dias = editor.form.diasEjecucion;
     const pathError = scriptPathError.value;
 
     const parts: string[] = [];
+    if (!codigo) parts.push('Código');
     if (!nombre) parts.push('Nombre');
     if (pathError) parts.push('Script');
     if (!hora) parts.push('Hora');

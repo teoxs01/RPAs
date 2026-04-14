@@ -94,7 +94,7 @@ export function useRpaAutomationsPage() {
 
   function confirmDelete() {
     if (!deleter.target) return;
-    void removeAutomation(deleter.target.id);
+    void removeAutomation(deleter.target.autoId);
   }
 
   async function removeAutomation(id: number) {
@@ -107,6 +107,7 @@ export function useRpaAutomationsPage() {
 
   return {
     headers,
+
 
     toast,
 

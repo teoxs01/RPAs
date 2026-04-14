@@ -66,7 +66,9 @@ export function useRpaAutomationsFilters(items: { value: Automation[] }) {
 
     return items.value.filter((it) => {
       const matchesSearch =
-        !search || it.nombre.toLowerCase().includes(search) || it.scriptPath.toLowerCase().includes(search);
+        !search ||
+        it.nombre.toLowerCase().includes(search) ||
+        (it.scriptPath ?? '').toLowerCase().includes(search);
       const matchesActivo =
         filters.activo === 'Todos' ||
         (filters.activo === 'Sí' ? it.activo === true : it.activo === false);

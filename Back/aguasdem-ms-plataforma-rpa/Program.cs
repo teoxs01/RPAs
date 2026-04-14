@@ -4,28 +4,23 @@ using aguasdem_ms_plataforma_rpa.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// 1. CORS debe estar antes de todo (Services)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .SetPreflightMaxAge(TimeSpan.FromMinutes(10));
+    });
+});
 
 // =============================
 // 🔌 CONEXIÓN A POSTGRESQL
 // =============================
 builder.Services.AddDbContext<RpaDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgresConnection")));
-
-
-// =============================
-// 🌐 CORS (para Vue)
-// =============================
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll",
-        policy =>
-        {
-            policy.SetIsOriginAllowed(_ => true) // Más robusto que AllowAnyOrigin para algunos navegadores
-                  .AllowAnyMethod()
-                  .AllowAnyHeader()
-                  .AllowCredentials(); // Permitir credenciales si fuera necesario
-        });
-});
 
 
 // =============================
@@ -53,14 +48,19 @@ builder.Services.AddSwaggerGen();
 // =============================
 var app = builder.Build();
 
-// Manejador global de errores con CORS forzado
+// 2. Aplicar CORS inmediatamente (punto más alto del pipeline)
+app.UseCors("AllowAll");
+
+// Manejador global de errores
 app.UseExceptionHandler(errorApp =>
 {
     errorApp.Run(async context =>
     {
-        context.Response.Headers["Access-Control-Allow-Origin"] = "*";
-        context.Response.Headers["Access-Control-Allow-Methods"] = "*";
-        context.Response.Headers["Access-Control-Allow-Headers"] = "*";
+        // Re-aplicar CORS en caso de error para que el navegador vea la respuesta
+        context.Response.Headers.AccessControlAllowOrigin = "*";
+        context.Response.Headers.AccessControlAllowHeaders = "*";
+        context.Response.Headers.AccessControlAllowMethods = "*";
+        
         context.Response.StatusCode = 500;
         context.Response.ContentType = "application/json";
         
@@ -76,20 +76,6 @@ app.UseExceptionHandler(errorApp =>
     });
 });
 
-// Middleware manual para OPTIONS y CORS general
-app.Use(async (context, next) =>
-{
-    context.Response.Headers["Access-Control-Allow-Origin"] = "*";
-    context.Response.Headers["Access-Control-Allow-Methods"] = "*";
-    context.Response.Headers["Access-Control-Allow-Headers"] = "*";
-    if (context.Request.Method == "OPTIONS")
-    {
-        context.Response.StatusCode = 200;
-        return;
-    }
-    await next();
-});
-
 
 // =============================
 // 🧪 SWAGGER
@@ -99,19 +85,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-
-// =============================
-// 🌐 CORS (activar)
-// =============================
-app.UseCors("AllowAll");
-
-
-// =============================
-// 🔐 (opcional futuro)
-// app.UseAuthentication();
-// app.UseAuthorization();
-// =============================
 
 
 // =============================

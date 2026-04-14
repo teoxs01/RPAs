@@ -61,32 +61,32 @@ export function useRpaAutomations(showToast: (message: string, color: ToastColor
   }
 
   async function toggleActive(item: Automation) {
-    if (rowBusy.value.has(item.id)) return;
-    rowBusy.value.add(item.id);
+    if (rowBusy.value.has(item.autoId)) return;
+    rowBusy.value.add(item.autoId);
     try {
-      await setAutomationActive(item.id, !item.activo);
+      await setAutomationActive(item.autoId, !item.activo);
       showToast(!item.activo ? 'Automatización activada' : 'Automatización desactivada', 'info');
       await load();
     } catch (e) {
       const message = e instanceof Error ? e.message : 'No fue posible actualizar el estado';
       showToast(message, 'error');
     } finally {
-      rowBusy.value.delete(item.id);
+      rowBusy.value.delete(item.autoId);
     }
   }
 
   async function execute(item: Automation) {
-    if (rowBusy.value.has(item.id)) return;
-    rowBusy.value.add(item.id);
+    if (rowBusy.value.has(item.autoId)) return;
+    rowBusy.value.add(item.autoId);
     try {
-      await executeAutomation(item.id);
+      await executeAutomation(item.autoId);
       showToast('Ejecución enviada', 'success');
       await load();
     } catch (e) {
       const message = e instanceof Error ? e.message : 'No fue posible ejecutar';
       showToast(message, 'error');
     } finally {
-      rowBusy.value.delete(item.id);
+      rowBusy.value.delete(item.autoId);
     }
   }
 

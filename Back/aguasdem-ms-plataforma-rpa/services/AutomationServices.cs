@@ -24,28 +24,28 @@ public class AutomationService
         foreach (var auto in automations)
         {
             var lastExecution = await _context.Ejecuciones
-                .Where(e => e.AutoId == auto.Id)
+                .Where(e => e.AutoId == auto.AutoId)
                 .OrderByDescending(e => e.FechaInicio)
                 .FirstOrDefaultAsync();
 
             results.Add(new
             {
-                id = auto.Id,
+                autoId = auto.AutoId,
                 nombre = auto.Nombre,
                 scriptPath = auto.ScriptPath,
                 horaEjecucion = auto.HoraEjecucion.ToString(@"hh\:mm"),
                 diasEjecucion = auto.DiasSemana,
                 activo = auto.Estado,
                 ultimoEstado = lastExecution?.Estado ?? "Pendiente",
-                ultimaEjecucion = lastExecution?.FechaInicio // Enviamos el objeto DateTime directamente
+                ultimaEjecucion = lastExecution?.FechaInicio
             });
         }
 
         return results;
     }
  
-    public async Task<ConfiguracionProceso?> GetById(int id)
-        => await _context.ConfiguracionProcesos.FindAsync(id);
+    public async Task<ConfiguracionProceso?> GetById(long autoId)
+        => await _context.ConfiguracionProcesos.FirstOrDefaultAsync(c => c.AutoId == autoId);
 
     public async Task<ConfiguracionProceso> Create(ConfiguracionProceso p)
     {
@@ -56,9 +56,9 @@ public class AutomationService
         return p;
     }
 
-    public async Task<ConfiguracionProceso?> Update(int id, ConfiguracionProceso p)
+    public async Task<ConfiguracionProceso?> Update(long autoId, ConfiguracionProceso p)
     {
-        var existing = await _context.ConfiguracionProcesos.FindAsync(id);
+        var existing = await _context.ConfiguracionProcesos.FirstOrDefaultAsync(c => c.AutoId == autoId);
         if (existing == null) return null;
 
         existing.Nombre = p.Nombre;
@@ -73,9 +73,9 @@ public class AutomationService
         return existing;
     }
 
-    public async Task<bool> SetActive(int id, bool activo)
+    public async Task<bool> SetActive(long autoId, bool activo)
     {
-        var existing = await _context.ConfiguracionProcesos.FindAsync(id);
+        var existing = await _context.ConfiguracionProcesos.FirstOrDefaultAsync(c => c.AutoId == autoId);
         if (existing == null) return false;
 
         existing.Estado = activo;
@@ -86,9 +86,9 @@ public class AutomationService
         return true;
     }
 
-    public async Task<bool> Delete(int id)
+    public async Task<bool> Delete(long autoId)
     {
-        var existing = await _context.ConfiguracionProcesos.FindAsync(id);
+        var existing = await _context.ConfiguracionProcesos.FirstOrDefaultAsync(c => c.AutoId == autoId);
         if (existing == null) return false;
 
         _context.ConfiguracionProcesos.Remove(existing);
@@ -96,9 +96,9 @@ public class AutomationService
         return true;
     }
  
-    public async Task Run(int id)
+    public async Task Run(long autoId)
     {
-        var proceso = await _context.ConfiguracionProcesos.FindAsync(id);
+        var proceso = await _context.ConfiguracionProcesos.FirstOrDefaultAsync(c => c.AutoId == autoId);
  
         if (proceso == null)
             throw new Exception("No encontrado");

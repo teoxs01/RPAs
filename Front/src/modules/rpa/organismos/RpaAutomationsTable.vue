@@ -13,7 +13,7 @@
     <v-data-table
       :headers="headers"
       :items="items"
-      item-key="id"
+      item-key="autoId"
       :items-per-page="10"
       class="rpa-table"
       density="comfortable"
@@ -51,12 +51,12 @@
 
       <template #item.diasEjecucion="{ item }">
         <div class="days-cell">
-          <v-chip v-if="isAllDays(item.diasEjecucion)" size="x-small" variant="tonal" color="primary" class="mr-1">
+          <v-chip v-if="isAllDays(item.diasEjecucion ?? [])" size="x-small" variant="tonal" color="primary" class="mr-1">
             Todos los días
           </v-chip>
           <v-chip
             v-else
-            v-for="day in item.diasEjecucion.slice(0, 3)"
+            v-for="day in (item.diasEjecucion ?? []).slice(0, 3)"
             :key="day"
             size="x-small"
             variant="tonal"
@@ -65,8 +65,8 @@
           >
             {{ day.substring(0, 3) }}
           </v-chip>
-          <span v-if="!isAllDays(item.diasEjecucion) && item.diasEjecucion.length > 3" class="days-cell__more">
-            +{{ item.diasEjecucion.length - 3 }}
+          <span v-if="!isAllDays(item.diasEjecucion ?? []) && (item.diasEjecucion ?? []).length > 3" class="days-cell__more">
+            +{{ (item.diasEjecucion ?? []).length - 3 }}
           </span>
         </div>
       </template>
@@ -83,7 +83,7 @@
                 color="primary"
                 class="action-btn"
                 :aria-label="`Editar ${item.nombre}`"
-                :disabled="loading || rowBusy.has(item.id)"
+                :disabled="loading || rowBusy.has(item.autoId)"
                 @click="$emit('edit', item)"
               >
                 <v-icon size="20">mdi-pencil-outline</v-icon>
@@ -101,7 +101,7 @@
                 :color="item.activo ? 'success' : 'error'"
                 class="action-btn"
                 :aria-label="item.activo ? 'Desactivar' : 'Activar'"
-                :disabled="loading || rowBusy.has(item.id)"
+                :disabled="loading || rowBusy.has(item.autoId)"
                 @click="$emit('toggle-activo', item)"
               >
                 <v-icon size="20">{{ item.activo ? 'mdi-toggle-switch' : 'mdi-toggle-switch-off' }}</v-icon>
@@ -119,7 +119,7 @@
                 color="error"
                 class="action-btn"
                 :aria-label="`Ejecutar ${item.nombre}`"
-                :disabled="loading || rowBusy.has(item.id)"
+                :disabled="loading || rowBusy.has(item.autoId)"
                 @click="$emit('execute', item)"
               >
                 <v-icon size="20">mdi-play-circle</v-icon>
@@ -137,7 +137,7 @@
                 color="error"
                 class="action-btn"
                 :aria-label="`Eliminar ${item.nombre}`"
-                :disabled="loading || rowBusy.has(item.id)"
+                :disabled="loading || rowBusy.has(item.autoId)"
                 @click="$emit('delete', item)"
               >
                 <v-icon size="20">mdi-delete-outline</v-icon>

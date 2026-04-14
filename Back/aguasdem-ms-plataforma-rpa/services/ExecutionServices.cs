@@ -17,7 +17,7 @@ public class ExecutionService
     {
         var ejec = new EjecucionRpa
         {
-            AutoId = proceso.Id,
+            AutoId = proceso.AutoId, // Corregido: usar AutoId de la automatización
             Estado = "EN_PROCESO",
             FechaInicio = DateTime.UtcNow,
             UsuaCrea = 1, // Por ahora valor por defecto

@@ -14,6 +14,10 @@ public class ConfiguracionProceso
     [JsonPropertyName("id")]
     public int Id { get; set; }
 
+    [Column("auto_id")]
+    [JsonPropertyName("autoId")]
+    public long AutoId { get; set; }
+
     [Column("nombre")]
     [JsonPropertyName("nombre")]
     public string Nombre { get; set; } = string.Empty;
@@ -45,4 +49,7 @@ public class ConfiguracionProceso
 
     [Column("fech_modi")]
     public DateTime? FechModi { get; set; }
+
+    [ForeignKey("AutoId")]
+    public Automatizacion? Automatizacion { get; set; }
 }
