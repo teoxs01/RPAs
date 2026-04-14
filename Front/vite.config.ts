@@ -11,4 +11,14 @@ export default defineConfig({
     },
   },
   define: { 'process.env': {} },
+  server: {
+    proxy: {
+      '/grafana': {
+        target: 'http://192.168.24.13:3000',
+        changeOrigin: true,
+        cookieDomainRewrite: 'localhost',
+        rewrite: path => path.replace(/^\/grafana/, ''),
+      },
+    },
+  },
 });

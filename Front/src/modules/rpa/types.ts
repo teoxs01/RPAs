@@ -9,6 +9,7 @@ export interface Automation {
   activo: boolean;
   ultimoEstado: UltimoEstado;
   ultimaEjecucion: string | null;
+
 }
 
 export interface AutomationUpsertInput {

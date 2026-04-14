@@ -22,8 +22,8 @@
 import { computed } from 'vue';
 import RpaPageHeader from '@/modules/rpa/moleculas/RpaPageHeader.vue';
 
-const defaultGrafanaEmbedUrl =
-  'http://192.168.24.13:3000/';
+const defaultGrafanaEmbedUrl 
+  = '/grafana/';
 
 const grafanaEmbedUrl = computed(() => import.meta.env.VITE_GRAFANA_EMBED_URL || defaultGrafanaEmbedUrl);
 </script>
