@@ -54,5 +54,9 @@ public class Automatizacion
     [Column("fech_modi")]
     public DateTime? FechModi { get; set; }
 
+    [JsonIgnore]
     public ConfiguracionProceso? Configuracion { get; set; }
+
+    [JsonIgnore]
+    public AppConfiguration? AppConfig { get; set; }
 }

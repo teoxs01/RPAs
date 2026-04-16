@@ -18,26 +18,39 @@ public class AutomationService
  
     public async Task<object> GetAll()
     {
-        var automations = await _context.ConfiguracionProcesos.ToListAsync();
+        var configs = await _context.ConfiguracionProcesos
+            .Include(c => c.Automatizacion)
+            .ThenInclude(a => a.AppConfig)
+            .ToListAsync();
+            
         var results = new List<object>();
 
-        foreach (var auto in automations)
+        foreach (var config in configs)
         {
             var lastExecution = await _context.Ejecuciones
-                .Where(e => e.AutoId == auto.AutoId)
+                .Where(e => e.AutoId == config.AutoId)
                 .OrderByDescending(e => e.FechaInicio)
                 .FirstOrDefaultAsync();
 
             results.Add(new
             {
-                autoId = auto.AutoId,
-                nombre = auto.Nombre,
-                scriptPath = auto.ScriptPath,
-                horaEjecucion = auto.HoraEjecucion.ToString(@"hh\:mm"),
-                diasEjecucion = auto.DiasSemana,
-                activo = auto.Estado,
+                autoId = config.AutoId,
+                codigo = config.Automatizacion?.Codigo ?? string.Empty,
+                nombre = config.Nombre,
+                descripcion = config.Automatizacion?.Descripcion,
+                tipo = config.Automatizacion?.Tipo ?? string.Empty,
+                entorno = config.Automatizacion?.Entorno ?? string.Empty,
+                scriptPath = config.ScriptPath,
+                horaEjecucion = config.HoraEjecucion.ToString(@"hh\:mm"),
+                diasEjecucion = config.DiasSemana,
+                activo = config.Estado,
                 ultimoEstado = lastExecution?.Estado ?? "Pendiente",
-                ultimaEjecucion = lastExecution?.FechaInicio
+                ultimaEjecucion = lastExecution?.FechaInicio,
+                // Nuevos campos
+                appName = config.Automatizacion?.AppConfig?.AppName,
+                appUser = config.Automatizacion?.AppConfig?.User,
+                appPassword = config.Automatizacion?.AppConfig?.Password,
+                appUrl = config.Automatizacion?.AppConfig?.Url
             });
         }
 
@@ -88,12 +101,30 @@ public class AutomationService
 
     public async Task<bool> Delete(long autoId)
     {
-        var existing = await _context.ConfiguracionProcesos.FirstOrDefaultAsync(c => c.AutoId == autoId);
-        if (existing == null) return false;
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            // 1. Eliminar AppConfiguration
+            var appConfig = await _context.AppConfigurations.FirstOrDefaultAsync(ac => ac.AutoId == autoId);
+            if (appConfig != null) _context.AppConfigurations.Remove(appConfig);
 
-        _context.ConfiguracionProcesos.Remove(existing);
-        await _context.SaveChangesAsync();
-        return true;
+            // 2. Eliminar ConfiguracionProceso
+            var config = await _context.ConfiguracionProcesos.FirstOrDefaultAsync(c => c.AutoId == autoId);
+            if (config != null) _context.ConfiguracionProcesos.Remove(config);
+
+            // 3. Eliminar Automatizacion (Maestro)
+            var auto = await _context.Automatizaciones.FirstOrDefaultAsync(a => a.AutoId == autoId);
+            if (auto != null) _context.Automatizaciones.Remove(auto);
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            return true;
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            return false;
+        }
     }
  
     public async Task Run(long autoId)

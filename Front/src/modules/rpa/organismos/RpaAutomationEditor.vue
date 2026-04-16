@@ -19,19 +19,21 @@
       <v-card-text class="pa-0" style="height: 500px;">
         <v-stepper v-model="step" alt-labels flat class="bg-transparent">
           <v-stepper-header>
-            <v-stepper-item :complete="step > 1" value="1" title="Información" />
+            <v-stepper-item :complete="step > 1" :value="1" title="Información" />
             <v-divider />
-            <v-stepper-item :complete="step > 2" value="2" title="Configuración" />
+            <v-stepper-item :complete="step > 2" :value="2" title="Configuración" />
+            <v-divider />
+            <v-stepper-item :complete="step > 3" :value="3" title="App Config" />
           </v-stepper-header>
 
           <v-stepper-window>
             <!-- PASO 1: Nombre y Descripción -->
-            <v-stepper-window-item value="1" class="pa-4">
+            <v-stepper-window-item :value="1" class="pa-4">
               <v-row dense>
                 <v-col cols="12" md="6">
                   <v-text-field
                     v-model="localForm.codigo"
-                    label="Código de la automatización"
+                    label="Código de la automatización*"
                     variant="outlined"
                     density="compact"
                     hide-details
@@ -42,7 +44,7 @@
                 <v-col cols="12" md="6">
                   <v-text-field
                     v-model="localForm.nombre"
-                    label="Nombre de la automatización"
+                    label="Nombre de la automatización*"
                     variant="outlined"
                     density="compact"
                     hide-details
@@ -64,7 +66,7 @@
                 <v-col cols="12" md="6">
                   <v-select
                     v-model="localForm.tipo"
-                    :items="['RPA', 'API', 'Script']"
+                    :items="['API', 'PYTHON']"
                     label="Tipo"
                     variant="outlined"
                     density="compact"
@@ -75,7 +77,7 @@
                 <v-col cols="12" md="6">
                   <v-select
                     v-model="localForm.entorno"
-                    :items="['PROD', 'DESA', 'QA']"
+                    :items="['PROD', 'DESA']"
                     label="Entorno"
                     variant="outlined"
                     density="compact"
@@ -87,7 +89,7 @@
             </v-stepper-window-item>
 
             <!-- PASO 2: Configuración -->
-            <v-stepper-window-item value="2" class="pa-4">
+            <v-stepper-window-item :value="2" class="pa-4">
               <v-row dense>
                 <v-col cols="12">
                   <RpaScriptPathField
@@ -149,16 +151,70 @@
                 </v-col>
               </v-row>
             </v-stepper-window-item>
+
+            <!-- PASO 3: App Config (Opcional) -->
+            <v-stepper-window-item :value="3" class="pa-4">
+              <v-row dense>
+                <v-col cols="12" md="6">
+                  <v-text-field
+                    v-model="localForm.appName"
+                    label="Nombre de la Aplicación"
+                    variant="outlined"
+                    density="compact"
+                    hide-details
+                    class="bg-white"
+                  />
+                </v-col>
+                <v-col cols="12" md="6">
+                  <v-text-field
+                    v-model="localForm.appUrl"
+                    label="URL de la Aplicación"
+                    variant="outlined"
+                    density="compact"
+                    hide-details
+                    class="bg-white"
+                  />
+                </v-col>
+                <v-col cols="12" md="6">
+                  <v-text-field
+                    v-model="localForm.appUser"
+                    label="Usuario"
+                    variant="outlined"
+                    density="compact"
+                    hide-details
+                    class="bg-white"
+                  />
+                </v-col>
+                <v-col cols="12" md="6">
+                  <v-text-field
+                    v-model="localForm.appPassword"
+                    label="Contraseña"
+                    :type="showPassword ? 'text' : 'password'"
+                    :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+                    variant="outlined"
+                    density="compact"
+                    hide-details
+                    class="bg-white"
+                    @click:append-inner="showPassword = !showPassword"
+                  />
+                </v-col>
+                <v-col cols="12" class="mt-2">
+                  <v-alert type="info" variant="tonal" density="compact" class="text-caption">
+                    Estos campos son opcionales y se guardarán junto con la automatización.
+                  </v-alert>
+                </v-col>
+              </v-row>
+            </v-stepper-window-item>
           </v-stepper-window>
         </v-stepper>
       </v-card-text>
       <v-divider />
       <v-card-actions class="pa-4">
-        <v-btn v-if="step === 2 && mode === 'create'" variant="tonal" @click="step = 1" prepend-icon="mdi-chevron-left">Atrás</v-btn>
+        <v-btn v-if="step > 1" variant="tonal" @click="step--" prepend-icon="mdi-chevron-left">Atrás</v-btn>
         <v-spacer />
         <v-btn variant="text" @click="handleClose" class="mr-2">Cancelar</v-btn>
-        <v-btn v-if="step === 1" color="primary" variant="elevated" @click="handleNext" append-icon="mdi-chevron-right">Siguiente</v-btn>
-        <v-btn v-else color="success" variant="elevated" :loading="saving" @click="handleSave" prepend-icon="mdi-check">Guardar Automatización</v-btn>
+        <v-btn v-if="step < 3" color="primary" variant="elevated" @click="nextStep" append-icon="mdi-chevron-right">Siguiente</v-btn>
+        <v-btn v-else color="success" variant="elevated" :loading="loading" @click="handleSave" prepend-icon="mdi-check">Guardar Automatización</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -169,7 +225,6 @@ import { ref, watch } from 'vue';
 import RpaScriptPathField from '@/modules/rpa/moleculas/RpaScriptPathField.vue';
 import type { AutomationUpsertInput } from '@/modules/rpa/types';
 
-import { createAutomatizacion, updateAutomatizacion, saveConfiguracion } from '@/modules/rpa/services/automatizaciones.service';
 import { useRpaToast } from '@/modules/rpa/composables/useRpaToast';
 
 const props = defineProps<{
@@ -179,12 +234,14 @@ const props = defineProps<{
   scriptPathError?: string | null;
   diasSemana: string[];
   isAllDays: (days: string[]) => boolean;
+  loading?: boolean;
 }>();
 
 const emit = defineEmits<{
   (e: 'update:open', value: boolean): void;
   (e: 'update:field', payload: { field: keyof AutomationUpsertInput; value: any }): void;
   (e: 'close'): void;
+  (e: 'save'): void;
   (e: 'save-complete'): void;
   (e: 'paste'): void;
   (e: 'copy'): void;
@@ -193,8 +250,7 @@ const emit = defineEmits<{
 
 const { showToast } = useRpaToast();
 const step = ref(1);
-const saving = ref(false);
-const autoId = ref<number | null>(null);
+const showPassword = ref(false);
 
 const localForm = ref({
   codigo: '',
@@ -206,13 +262,16 @@ const localForm = ref({
   horaEjecucion: '08:00',
   diasEjecucion: [] as string[],
   activo: true,
+  appName: '',
+  appUser: '',
+  appPassword: '',
+  appUrl: '',
 });
 
 watch(() => props.open, (newVal) => {
   if (newVal) {
     step.value = 1;
-    // En modo edición, cargamos el ID que viene del form (que ahora incluye autoId)
-    autoId.value = (props.form as any).autoId ?? null;
+    showPassword.value = false;
     localForm.value = {
       codigo: props.form.codigo ?? '',
       nombre: props.form.nombre ?? '',
@@ -223,51 +282,32 @@ watch(() => props.open, (newVal) => {
       horaEjecucion: props.form.horaEjecucion ?? '08:00',
       diasEjecucion: [...(props.form.diasEjecucion ?? [])],
       activo: props.form.activo ?? true,
+      appName: props.form.appName ?? '',
+      appUser: props.form.appUser ?? '',
+      appPassword: props.form.appPassword ?? '',
+      appUrl: props.form.appUrl ?? '',
     };
   }
 });
 
 function getTitle() {
-  if (props.mode === 'create') {
-    return step.value === 1 ? 'Nueva automatización - Información' : 'Nueva automatización - Configuración';
-  }
-  return step.value === 1 ? 'Editar automatización - Información' : 'Editar automatización - Configuración';
+  const prefix = props.mode === 'create' ? 'Nueva' : 'Editar';
+  const steps: Record<number, string> = {
+    1: 'Información',
+    2: 'Configuración',
+    3: 'App Config'
+  };
+  return `${prefix} automatización - ${steps[step.value] || ''}`;
 }
 
-async function handleNext() {
-  if (!localForm.value.nombre.trim() || !localForm.value.codigo.trim()) {
-    showToast('El código y el nombre son obligatorios', 'warning');
-    return;
-  }
-
-  saving.value = true;
-  try {
-    const payload = {
-      codigo: localForm.value.codigo,
-      nombre: localForm.value.nombre,
-      descripcion: localForm.value.descripcion,
-      tipo: localForm.value.tipo,
-      entorno: localForm.value.entorno
-    };
-
-    if (props.mode === 'create' && !autoId.value) {
-      const res = await createAutomatizacion(payload);
-      autoId.value = (res as any).autoId;
-      showToast('Automatización creada correctamente', 'success');
-    } else {
-      // Si ya tenemos autoId (editando o acabamos de crear), actualizamos
-      if (autoId.value) {
-        await updateAutomatizacion(autoId.value, payload);
-        showToast('Información básica actualizada', 'info');
-      }
+function nextStep() {
+  if (step.value === 1) {
+    if (!localForm.value.nombre.trim() || !localForm.value.codigo.trim()) {
+      showToast('El código y el nombre son obligatorios', 'warning');
+      return;
     }
-    
-    step.value = 2;
-  } catch (e) {
-    showToast('Error al guardar la automatización', 'error');
-  } finally {
-    saving.value = false;
   }
+  step.value++;
 }
 
 function handleClose() {
@@ -275,26 +315,16 @@ function handleClose() {
   emit('update:open', false);
 }
 
-async function handleSave() {
-  if (!autoId.value) return;
-
-  saving.value = true;
-  try {
-    await saveConfiguracion(autoId.value, {
-      scriptPath: localForm.value.scriptPath,
-      horaEjecucion: localForm.value.horaEjecucion,
-      diasSemana: localForm.value.diasEjecucion,
-      activo: localForm.value.activo
-    });
-    
-    showToast('Configuración guardada correctamente', 'success');
-    emit('save-complete');
-    handleClose();
-  } catch (e) {
-    showToast('Error al guardar la configuración', 'error');
-  } finally {
-    saving.value = false;
-  }
+function handleSave() {
+  // Sincronizamos los campos del formulario local al formulario del padre antes de emitir save
+  Object.keys(localForm.value).forEach(key => {
+    emit('update:field', { field: key as keyof AutomationUpsertInput, value: (localForm.value as any)[key] });
+  });
+  
+  // Emitimos el evento save que el padre está escuchando
+  setTimeout(() => {
+    emit('save');
+  }, 0);
 }
 </script>
 

@@ -51,5 +51,6 @@ public class ConfiguracionProceso
     public DateTime? FechModi { get; set; }
 
     [ForeignKey("AutoId")]
+    [JsonIgnore]
     public Automatizacion? Automatizacion { get; set; }
 }

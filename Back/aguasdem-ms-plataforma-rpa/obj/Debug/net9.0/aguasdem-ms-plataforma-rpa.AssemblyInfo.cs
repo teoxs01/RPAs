@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("aguasdem-ms-plataforma-rpa")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d3d2cd121c9cbdd3f49cb6b94b8439d0b15ed332")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4e99192804cd9c846e968362c72b3d41a1748a93")]
 [assembly: System.Reflection.AssemblyProductAttribute("aguasdem-ms-plataforma-rpa")]
 [assembly: System.Reflection.AssemblyTitleAttribute("aguasdem-ms-plataforma-rpa")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

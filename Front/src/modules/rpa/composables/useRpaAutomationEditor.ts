@@ -25,6 +25,10 @@ export function useRpaAutomationEditor(showToast: (message: string, color: Toast
       horaEjecucion: '08:00',
       diasEjecucion: [] as string[],
       activo: true,
+      appName: '',
+      appUser: '',
+      appPassword: '',
+      appUrl: '',
     },
   });
 
@@ -112,6 +116,10 @@ export function useRpaAutomationEditor(showToast: (message: string, color: Toast
       horaEjecucion: '08:00',
       diasEjecucion: [],
       activo: true,
+      appName: '',
+      appUser: '',
+      appPassword: '',
+      appUrl: '',
     };
     editor.open = true;
   }
@@ -130,6 +138,10 @@ export function useRpaAutomationEditor(showToast: (message: string, color: Toast
       horaEjecucion: item.horaEjecucion ?? '08:00',
       diasEjecucion: item.diasEjecucion ? [...item.diasEjecucion] : [],
       activo: item.activo ?? true,
+      appName: item.appName ?? '',
+      appUser: item.appUser ?? '',
+      appPassword: item.appPassword ?? '',
+      appUrl: item.appUrl ?? '',
     } as any;
     editor.open = true;
   }
@@ -149,6 +161,10 @@ export function useRpaAutomationEditor(showToast: (message: string, color: Toast
       horaEjecucion: editor.form.horaEjecucion,
       diasEjecucion: [...editor.form.diasEjecucion],
       activo: editor.form.activo,
+      appName: editor.form.appName?.trim(),
+      appUser: editor.form.appUser?.trim(),
+      appPassword: editor.form.appPassword,
+      appUrl: editor.form.appUrl?.trim(),
     };
   }
 

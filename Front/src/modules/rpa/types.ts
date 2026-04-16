@@ -40,6 +40,11 @@ export interface Automation {
   activo?: boolean;
   ultimoEstado: UltimoEstado;
   ultimaEjecucion: string | null;
+  // Nuevos campos
+  appName?: string | null;
+  appUser?: string | null;
+  appPassword?: string | null;
+  appUrl?: string | null;
 }
 
 export interface AutomationUpsertInput {
@@ -52,6 +57,11 @@ export interface AutomationUpsertInput {
   horaEjecucion?: string;
   diasEjecucion?: string[];
   activo?: boolean;
+  // Nuevos campos
+  appName?: string | null;
+  appUser?: string | null;
+  appPassword?: string | null;
+  appUrl?: string | null;
 }
 
 export interface AutomatizacionCreateInput {

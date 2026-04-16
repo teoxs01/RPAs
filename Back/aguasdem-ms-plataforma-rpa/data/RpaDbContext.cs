@@ -12,4 +12,5 @@ public class RpaDbContext : DbContext
     public DbSet<Automatizacion> Automatizaciones { get; set; }
     public DbSet<ConfiguracionProceso> ConfiguracionProcesos { get; set; }
     public DbSet<EjecucionRpa> Ejecuciones { get; set; }
+    public DbSet<AppConfiguration> AppConfigurations { get; set; }
 }

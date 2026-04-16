@@ -1,5 +1,8 @@
 namespace aguasdem_ms_plataforma_rpa.Controllers;
 
+using System;
+using System.Collections.Generic;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using aguasdem_ms_plataforma_rpa.Data;
@@ -53,13 +56,14 @@ public class AutomatizacionesController : ControllerBase
             _context.Automatizaciones.Add(automatizacion);
             await _context.SaveChangesAsync();
 
-            // Crear la configuración asociada
+            TimeSpan.TryParse(request.HoraEjecucion, out var horaEjecucion);
+
             var config = new ConfiguracionProceso
             {
                 AutoId = automatizacion.AutoId,
                 Nombre = automatizacion.Nombre,
                 ScriptPath = request.ScriptPath ?? string.Empty,
-                HoraEjecucion = request.HoraEjecucion,
+                HoraEjecucion = horaEjecucion,
                 DiasSemana = request.DiasSemana,
                 Estado = request.Activo,
                 UsuaCrea = 1,
@@ -68,6 +72,23 @@ public class AutomatizacionesController : ControllerBase
 
             _context.ConfiguracionProcesos.Add(config);
             await _context.SaveChangesAsync();
+
+            // Crear AppConfiguration si se proporcionaron datos
+            if (!string.IsNullOrEmpty(request.AppName))
+            {
+                var appConfig = new AppConfiguration
+                {
+                    AutoId = automatizacion.AutoId,
+                    AppName = request.AppName,
+                    User = request.AppUser ?? string.Empty,
+                    Password = request.AppPassword ?? string.Empty,
+                    Url = request.AppUrl,
+                    Status = "ACTIVO",
+                    Date = DateTime.UtcNow
+                };
+                _context.AppConfigurations.Add(appConfig);
+                await _context.SaveChangesAsync();
+            }
 
             await transaction.CommitAsync();
             return Ok(automatizacion);
@@ -108,11 +129,30 @@ public class AutomatizacionesController : ControllerBase
 
             config.Nombre = existing.Nombre;
             config.ScriptPath = request.ScriptPath ?? string.Empty;
-            config.HoraEjecucion = request.HoraEjecucion;
+            TimeSpan.TryParse(request.HoraEjecucion, out var horaEjecucion);
+            config.HoraEjecucion = horaEjecucion;
             config.DiasSemana = request.DiasSemana;
             config.Estado = request.Activo;
             config.UsuaModi = 1;
             config.FechModi = DateTime.UtcNow;
+
+            // Actualizar o crear AppConfiguration si se proporcionaron datos
+            if (!string.IsNullOrEmpty(request.AppName))
+            {
+                var appConfig = await _context.AppConfigurations
+                    .FirstOrDefaultAsync(ac => ac.AutoId == id);
+
+                if (appConfig == null)
+                {
+                    appConfig = new AppConfiguration { AutoId = id, Status = "ACTIVO", Date = DateTime.UtcNow };
+                    _context.AppConfigurations.Add(appConfig);
+                }
+
+                appConfig.AppName = request.AppName;
+                appConfig.User = request.AppUser ?? string.Empty;
+                appConfig.Password = request.AppPassword ?? string.Empty;
+                appConfig.Url = request.AppUrl;
+            }
 
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
@@ -156,55 +196,133 @@ public class AutomatizacionesController : ControllerBase
     [HttpPost("{id}/configuracion")]
     public async Task<IActionResult> SaveConfig(long id, [FromBody] ConfiguracionProcesoRequest request)
     {
-        var automatizacion = await _context.Automatizaciones.FindAsync(id);
-        if (automatizacion == null) return NotFound("La automatización no existe");
-
-        var config = await _context.ConfiguracionProcesos
-            .FirstOrDefaultAsync(c => c.AutoId == id);
-
-        if (config == null)
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
         {
-            config = new ConfiguracionProceso { AutoId = id };
-            _context.ConfiguracionProcesos.Add(config);
+            var automatizacion = await _context.Automatizaciones.FindAsync(id);
+            if (automatizacion == null) return NotFound("La automatización no existe");
+
+            var config = await _context.ConfiguracionProcesos
+                .FirstOrDefaultAsync(c => c.AutoId == id);
+
+            if (config == null)
+            {
+                config = new ConfiguracionProceso { AutoId = id };
+                _context.ConfiguracionProcesos.Add(config);
+            }
+
+            config.Nombre = automatizacion.Nombre; // Sincronizamos el nombre
+            config.ScriptPath = request.ScriptPath;
+            TimeSpan.TryParse(request.HoraEjecucion, out var hora);
+            config.HoraEjecucion = hora;
+            config.DiasSemana = request.DiasSemana;
+            config.Estado = request.Activo;
+            config.UsuaModi = 1;
+            config.FechModi = DateTime.UtcNow;
+
+            // También actualizamos AppConfiguration si viene en el request
+            if (!string.IsNullOrEmpty(request.AppName))
+            {
+                var appConfig = await _context.AppConfigurations
+                    .FirstOrDefaultAsync(ac => ac.AutoId == id);
+
+                if (appConfig == null)
+                {
+                    appConfig = new AppConfiguration { AutoId = id, Status = "ACTIVO", Date = DateTime.UtcNow };
+                    _context.AppConfigurations.Add(appConfig);
+                }
+
+                appConfig.AppName = request.AppName;
+                appConfig.User = request.AppUser ?? string.Empty;
+                appConfig.Password = request.AppPassword ?? string.Empty;
+                appConfig.Url = request.AppUrl;
+            }
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            return Ok(config);
         }
-
-        config.Nombre = automatizacion.Nombre; // Sincronizamos el nombre
-        config.ScriptPath = request.ScriptPath;
-        config.HoraEjecucion = request.HoraEjecucion;
-        config.DiasSemana = request.DiasSemana;
-        config.Estado = request.Activo;
-        config.UsuaModi = 1;
-        config.FechModi = DateTime.UtcNow;
-
-        await _context.SaveChangesAsync();
-        return Ok(config);
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            return BadRequest(new { message = "Error al guardar la configuración", detail = ex.Message });
+        }
     }
 }
 
 public class ActivoRequest
 {
+    [JsonPropertyName("activo")]
     public bool Activo { get; set; }
 }
 
 public class AutomatizacionCreateRequest
 {
+    [JsonPropertyName("codigo")]
     public string Codigo { get; set; } = string.Empty;
+    
+    [JsonPropertyName("nombre")]
     public string Nombre { get; set; } = string.Empty;
+    
+    [JsonPropertyName("descripcion")]
     public string? Descripcion { get; set; }
+    
+    [JsonPropertyName("tipo")]
     public string Tipo { get; set; } = string.Empty;
+    
+    [JsonPropertyName("entorno")]
     public string? Entorno { get; set; }
     
-    // Campos de configuración
+    [JsonPropertyName("scriptPath")]
     public string? ScriptPath { get; set; }
-    public TimeSpan HoraEjecucion { get; set; }
+    
+    [JsonPropertyName("horaEjecucion")]
+    public string HoraEjecucion { get; set; } = "08:00";
+    
+    [JsonPropertyName("diasEjecucion")]
     public List<string> DiasSemana { get; set; } = new();
+    
+    [JsonPropertyName("activo")]
     public bool Activo { get; set; }
+
+    // Campos de AppConfiguration (opcionales)
+    [JsonPropertyName("appName")]
+    public string? AppName { get; set; }
+    
+    [JsonPropertyName("appUser")]
+    public string? AppUser { get; set; }
+    
+    [JsonPropertyName("appPassword")]
+    public string? AppPassword { get; set; }
+    
+    [JsonPropertyName("appUrl")]
+    public string? AppUrl { get; set; }
 }
 
 public class ConfiguracionProcesoRequest
 {
+    [JsonPropertyName("scriptPath")]
     public string ScriptPath { get; set; } = string.Empty;
-    public TimeSpan HoraEjecucion { get; set; }
+    
+    [JsonPropertyName("horaEjecucion")]
+    public string HoraEjecucion { get; set; } = "08:00";
+    
+    [JsonPropertyName("diasSemana")]
     public List<string> DiasSemana { get; set; } = new();
+    
+    [JsonPropertyName("activo")]
     public bool Activo { get; set; }
+
+    // Campos de AppConfiguration (opcionales)
+    [JsonPropertyName("appName")]
+    public string? AppName { get; set; }
+    
+    [JsonPropertyName("appUser")]
+    public string? AppUser { get; set; }
+    
+    [JsonPropertyName("appPassword")]
+    public string? AppPassword { get; set; }
+    
+    [JsonPropertyName("appUrl")]
+    public string? AppUrl { get; set; }
 }

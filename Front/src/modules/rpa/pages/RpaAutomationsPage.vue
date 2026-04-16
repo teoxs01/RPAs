@@ -50,6 +50,7 @@
     :script-path-error="scriptPathError"
     :dias-semana="diasSemana"
     :is-all-days="isAllDays"
+    :loading="tableLoading"
     @update:field="({ field, value }: { field: keyof AutomationUpsertInput; value: any }) => {
       (editor.form as any)[field] = value;
     }"
