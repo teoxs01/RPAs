@@ -1,4 +1,11 @@
-export type UltimoEstado = 'Exitosa' | 'Error' | 'Pendiente';
+export const UltimoEstado = {
+  OK: 'OK',
+  ERROR: 'ERROR',
+  EN_PROCESO: 'EN_PROCESO',
+  PENDIENTE: 'Pendiente'
+} as const;
+
+export type UltimoEstado = typeof UltimoEstado[keyof typeof UltimoEstado];
 
 export interface Automatizacion {
   autoId: number;

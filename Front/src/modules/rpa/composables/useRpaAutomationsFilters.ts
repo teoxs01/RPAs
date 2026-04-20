@@ -1,6 +1,6 @@
 import { computed, reactive } from 'vue';
 
-import type { Automation, UltimoEstado } from '@/modules/rpa/types';
+import { type Automation, UltimoEstado } from '@/modules/rpa/types';
 
 export function useRpaAutomationsFilters(items: { value: Automation[] }) {
   const filters = reactive({
@@ -10,7 +10,13 @@ export function useRpaAutomationsFilters(items: { value: Automation[] }) {
   });
 
   const activoOptions = ['Todos', 'Sí', 'No'];
-  const estadoOptions: Array<'Todos' | UltimoEstado> = ['Todos', 'Exitosa', 'Error', 'Pendiente'];
+  const estadoOptions: Array<'Todos' | UltimoEstado> = [
+    'Todos',
+    UltimoEstado.OK,
+    UltimoEstado.ERROR,
+    UltimoEstado.EN_PROCESO,
+    UltimoEstado.PENDIENTE,
+  ];
 
   const dialog = reactive({
     open: false,

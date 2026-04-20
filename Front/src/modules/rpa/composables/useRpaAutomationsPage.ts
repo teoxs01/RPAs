@@ -1,6 +1,6 @@
 import { computed, reactive } from 'vue';
 
-import type { Automation, UltimoEstado } from '@/modules/rpa/types';
+import { type Automation, UltimoEstado } from '@/modules/rpa/types';
 
 import { useRpaAutomationEditor } from '@/modules/rpa/composables/useRpaAutomationEditor';
 import { useRpaAutomations } from '@/modules/rpa/composables/useRpaAutomations';
@@ -26,15 +26,16 @@ export function useRpaAutomationsPage() {
   const stats = computed(() => {
     const total = automations.items.value.length;
     const activas = automations.items.value.filter((x) => x.activo).length;
-    const errores = automations.items.value.filter((x) => x.ultimoEstado === 'Error').length;
-    const pendientes = automations.items.value.filter((x) => x.ultimoEstado === 'Pendiente').length;
+    const errores = automations.items.value.filter((x) => x.ultimoEstado === UltimoEstado.ERROR).length;
+    const pendientes = automations.items.value.filter((x) => x.ultimoEstado === UltimoEstado.PENDIENTE).length;
 
     return { total, activas, errores, pendientes };
   });
 
   function estadoColor(value: string | UltimoEstado) {
-    if (value === 'Exitosa') return 'success';
-    if (value === 'Error') return 'error';
+    if (value === UltimoEstado.OK) return 'success';
+    if (value === UltimoEstado.ERROR) return 'error';
+    if (value === UltimoEstado.EN_PROCESO) return 'info';
     return 'warning';
   }
 
